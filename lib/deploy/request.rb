@@ -23,8 +23,8 @@ module Deploy
       uri = URI.parse([Deploy.site, @path].join('/'))
       http_request = http_class.new(uri.path)
       http_request.basic_auth(Deploy.email, Deploy.api_key)
-      http_request.add_field("Accept", "application/json")
-      http_request.add_field("Content-type", "application/json")
+      http_request["Accept"] = "application/json"
+      http_request["Content-type"] = "application/json"
       
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
