@@ -10,6 +10,11 @@ module Deploy
     def deployment(identifier)
       Deployment.find(identifier, :project => self)
     end
+
+    def latest_revision(branch = '')
+      branch = 'master'
+      Request.new(self.class.member_path(self.permalink) + "/repository/latest_revision?branch=#{branch}").make.output
+    end
     
     ## Create a deployment in this project (and queue it to run)
     def deploy(server, start_revision, end_revision)
@@ -28,6 +33,10 @@ module Deploy
     ## Return all servers for this project
     def servers
       Server.find(:all, :project => self)
+    end
+
+    def server_groups
+      ServerGroup.find(:all, :project => self)
     end
     
     private

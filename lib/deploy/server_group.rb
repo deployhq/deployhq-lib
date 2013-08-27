@@ -1,18 +1,22 @@
 module Deploy
-  class Server < Base
+  class ServerGroup < Base
     
     class << self
       def collection_path(params = {})
-        "projects/#{params[:project].permalink}/servers"
+        "projects/#{params[:project].permalink}/server_groups"
       end
       
       def member_path(id, params = {})
-        "projects/#{params[:project].permalink}/servers/#{identifier}"
+        "projects/#{params[:project].permalink}/server_groups/#{identifier}"
       end
     end
     
     def default_params
       {:project => self.project}
+    end
+    
+    def servers
+      @servers ||= self.attributes['servers'].map {|server_attr| Deploy::Server.send(:create_object, server_attr) }
     end
 
     def to_s
@@ -26,6 +30,6 @@ module Deploy
         end
       end.join(' ')
     end
-    
+
   end
 end

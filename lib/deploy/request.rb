@@ -21,7 +21,7 @@ module Deploy
     ## Hashes will be converted to JSON before being sent to the remote service.
     def make
       uri = URI.parse([Deploy.site, @path].join('/'))
-      http_request = http_class.new(uri.path)
+      http_request = http_class.new(uri.request_uri)
       http_request.basic_auth(Deploy.email, Deploy.api_key)
       http_request["Accept"] = "application/json"
       http_request["Content-type"] = "application/json"

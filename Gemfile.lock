@@ -1,10 +1,12 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    json (1.4.6)
+    highline (1.6.16)
+    json (1.8.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  highline
   json

@@ -17,7 +17,9 @@ require 'deploy/base'
 
 require 'deploy/project'
 require 'deploy/deployment'
+require 'deploy/deployment_tap'
 require 'deploy/server'
+require 'deploy/server_group'
 
 
 module Deploy
