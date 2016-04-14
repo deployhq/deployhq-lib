@@ -96,8 +96,8 @@ module Deploy
         latest_revision = @project.latest_revision(parent.preferred_branch)
         @deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
 
-        @server_names = @deployment.servers.each_with_object({}) do |obj, hsh|
-          hsh[obj.delete("id")] = obj["name"]
+        @server_names = @deployment.servers.each_with_object({}) do |server, hsh|
+          hsh[server['id']] = server['name']
         end
         @longest_server_name = @server_names.values.map(&:length).max
 
@@ -120,9 +120,9 @@ module Deploy
           end
 
           if current_status != 'pending'
-            poll.taps.reverse.each do |tap|
+            poll.taps.each do |tap|
               puts format_tap(tap)
-              last_tap = tap.id
+              last_tap = tap.id.to_i
             end
           end
 
