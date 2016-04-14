@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
     deployhq executable.
   EOF
 
-  s.files = ['bin/deployhq'] + Dir.glob("{lib}/**/*")
-  s.require_path = 'lib'
+  s.files = Dir.glob("{lib,bin}/**/*")
+  s.require_paths = ["lib"]
   s.bindir = "bin"
   s.executables << "deployhq"
   s.has_rdoc = false
