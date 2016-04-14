@@ -9,6 +9,16 @@ versions may work fine.
 gem install deployhq
 ```
 
+## Configuration
+
+The CLI client will always look for the details of the current project in a
+file called Deployfile in the current directory. This file should contain your
+account URL, project permalink, username and API key, in JSON format. See
+Deployfile.example for a reference Deployfile.
+
+It is recommended each member of your team has their own Deployfile, since the
+username and API key are user specific.
+
 ## Usage
 
 ### CLI client
@@ -53,3 +63,8 @@ Waiting for deployment capacity......
   Deployment complete!
   Delivered notification to git-http-test-2 in test-repositories project.
 ```
+
+## Development
+
+The CLI client in particular is a bit experimental, and not yet finished. Any
+pull-requests to improve it would be greatly welcomed.
