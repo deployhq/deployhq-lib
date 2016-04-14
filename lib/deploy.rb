@@ -21,6 +21,7 @@ require 'deploy/deployment_tap'
 require 'deploy/deployment_status_poll'
 require 'deploy/server'
 require 'deploy/server_group'
+require 'deploy/version'
 
 
 module Deploy
