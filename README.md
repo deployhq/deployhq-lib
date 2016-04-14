@@ -17,8 +17,8 @@ The CLI client is still experimental and requires some work. Currently it has
 the ability to list all of the servers on a project, and make a new deployment
 to the most recent revison of a repository.
 
+#### List servers
 ```
-# List servers
 $ deployhq servers
 Ungrouped Servers
               Name : localhost
@@ -29,8 +29,8 @@ Ungrouped Servers
           Hostname : localhost:22
 ```
 
+#### Make a deployment
 ```
-# Make a deployment
 $ deployhq deploy
 1. localhost (branch: master) (currently: 70039facbbfb014e4e57ff0bea2c7f6ec5e48e0a)
 2. List Server Details
