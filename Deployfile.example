@@ -1,0 +1,6 @@
+{
+  "account" : "https://account.deployhq.com",
+  "username" : "myusername",
+  "api_key" : "my api key from /profile",
+  "project" : "permalink-for-my-project"
+}
