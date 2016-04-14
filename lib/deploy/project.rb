@@ -1,28 +1,30 @@
 module Deploy
   class Project < Base
-    
+
     ## Return all deployments for this project
     def deployments
       Deployment.find(:all, :project => self)
     end
-    
+
     ## Return a deployment
     def deployment(identifier)
       Deployment.find(identifier, :project => self)
     end
 
     def latest_revision(branch = '')
-      branch = 'master'
-      Request.new(self.class.member_path(self.permalink) + "/repository/latest_revision?branch=#{branch}").make.output
+      branch ||= 'master'
+      req = Request.new(self.class.member_path(self.permalink) + "/repository/latest_revision?branch=#{branch}").make
+      parsed = JSON.parse(req.output)
+      parsed['ref']
     end
-    
+
     ## Create a deployment in this project (and queue it to run)
     def deploy(server, start_revision, end_revision)
       run_deployment(server, start_revision, end_revision) do |d|
         d.mode = 'queue'
       end
     end
-    
+
     ##
     def preview(server, start_revision, end_revision)
       run_deployment(server, start_revision, end_revision) do |d|
@@ -38,9 +40,9 @@ module Deploy
     def server_groups
       ServerGroup.find(:all, :project => self)
     end
-    
+
     private
-    
+
     def run_deployment(server, start_revision, end_revision, &block)
       d = Deployment.new
       d.project = self
@@ -53,6 +55,6 @@ module Deploy
       d.save
       d
     end
-    
+
   end
 end

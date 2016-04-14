@@ -1,16 +1,16 @@
 module Deploy
   class Deployment < Base
-    
+
     class << self
       def collection_path(params = {})
         "projects/#{params[:project].permalink}/deployments"
       end
-      
+
       def member_path(id, params = {})
         "projects/#{params[:project].permalink}/deployments/#{id}"
       end
     end
-    
+
     def default_params
       {:project => self.project}
     end
@@ -27,9 +27,9 @@ module Deploy
       DeploymentTap.find(:all, params)
     end
 
-    def current_status
-      status = JSON.parse(Request.new(self.class.member_path(self.identifier, :project => self.project) + "/status").make.output)
-      status['status']
+    def status_poll(params = {})
+      params = {:deployment => self, :project => self.project}.merge(params)
+      DeploymentStatusPoll.poll(params)
     end
 
   end

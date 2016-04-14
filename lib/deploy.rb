@@ -18,13 +18,12 @@ require 'deploy/base'
 require 'deploy/project'
 require 'deploy/deployment'
 require 'deploy/deployment_tap'
+require 'deploy/deployment_status_poll'
 require 'deploy/server'
 require 'deploy/server_group'
 
 
 module Deploy
-  VERSION = '1.0.0'
-  
   class << self
     ## Domain which you wish to access (e.g. atech.deployhq.com)
     attr_accessor :site

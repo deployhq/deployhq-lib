@@ -108,7 +108,10 @@ module Deploy
         while ['running', 'pending'].include?(current_status) do
           sleep 1
 
-          current_status = @deployment.current_status
+          poll = @deployment.status_poll(:since => last_tap, :status => current_status)
+
+          # Status only gets returned from the API if it has changed
+          current_status = poll.status if poll.status
 
           if current_status == 'pending'
             print "."
@@ -117,13 +120,13 @@ module Deploy
           end
 
           if current_status != 'pending'
-            @deployment.taps(:since => last_tap).reverse.each do |tap|
+            poll.taps.reverse.each do |tap|
               puts format_tap(tap)
               last_tap = tap.id
             end
           end
 
-          previous_status = current_status    
+          previous_status = current_status
         end
       end
 
@@ -139,19 +142,19 @@ module Deploy
         end
       end
 
-      
+
       ## Data formatters
 
       def format_tap(tap)
         server_name = @server_names[tap.server_id]
-        
+
         if server_name
           padding = (@longest_server_name - server_name.length) / 2.0
           server_name = "[#{' ' * padding.ceil} #{server_name} #{' ' * padding.floor}]"
         else
           server_name = ' '
         end
-        
+
         text_colour = TAP_COLOURS[tap.tap_type.to_sym] || :white
 
         String.new.tap do |s|
@@ -161,7 +164,7 @@ module Deploy
       end
 
       def format_server(server)
-        server_params = { 
+        server_params = {
           "Name" => server.name,
           "Type" => PROTOCOL_NAME[server.protocol_type.to_sym],
           "Path" => server.server_path,
