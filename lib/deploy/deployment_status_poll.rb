@@ -11,6 +11,7 @@ module Deploy
     end
 
     def taps
+      return [] unless attributes['taps']
       @taps ||= attributes['taps'].map { |t| DeploymentTap.send(:create_object, t) }
     end
 
