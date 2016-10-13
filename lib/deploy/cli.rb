@@ -159,7 +159,7 @@ module Deploy
 
         String.new.tap do |s|
           s << "#{server_name} ".color(text_colour, :bold)
-          s << tap.message.color(text_colour)
+          s << tap.message.color(text_colour).gsub(/\<[^\>]*\>/, '')
         end
       end
 
