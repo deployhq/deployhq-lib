@@ -46,7 +46,7 @@ module Deploy
     def run_deployment(server, start_revision, end_revision, &block)
       d = Deployment.new
       d.project = self
-      d.server_identifier = (server.is_a?(Server) ? server.identifier : server)
+      d.parent_identifier = (server.is_a?(Server) ? server.identifier : server)
       d.start_revision = start_revision
       d.end_revision = end_revision
       d.copy_config_files = '1'

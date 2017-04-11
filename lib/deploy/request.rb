@@ -29,7 +29,6 @@ module Deploy
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
         http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
       
       data = self.data.to_json if self.data.is_a?(Hash) && self.data.respond_to?(:to_json)
