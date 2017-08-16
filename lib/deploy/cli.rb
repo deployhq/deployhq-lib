@@ -102,10 +102,11 @@ module Deploy
         @longest_server_name = @server_names.values.map(&:length).max
 
         last_tap = nil
+        last_tap_lines = 0
         current_status = 'pending'
         previous_status = ''
-        print "Waiting for deployment capacity..."
-        while ['running', 'pending'].include?(current_status) do
+        STDOUT.print "Waiting for deployment capacity..."
+        while ['running', 'pending'].include?(current_status)
           sleep 1
 
           poll = @deployment.status_poll(:since => last_tap, :status => current_status)
@@ -114,15 +115,29 @@ module Deploy
           current_status = poll.status if poll.status
 
           if current_status == 'pending'
-            print "."
+            STDOUT.print "."
           elsif current_status == 'running' && previous_status == 'pending'
-            puts "\n"
+            STDOUT.puts "\n"
           end
 
           if current_status != 'pending'
             poll.taps.each do |tap|
-              puts format_tap(tap)
+              # Delete most recent tap and redraw it if it's been updated
+              if tap.id.to_i == last_tap
+                if tap.updated
+                  # Restore the cursor to the start of the last entry so we can overwrite
+                  STDOUT.print "\e[#{last_tap_lines}A\r"
+                else
+                  next
+                end
+              end
+
+              tap_output = format_tap(tap)
+              last_tap_lines = tap_output.count("\n")
               last_tap = tap.id.to_i
+
+              STDOUT.print tap_output
+              STDOUT.flush
             end
           end
 
@@ -138,10 +153,9 @@ module Deploy
         @longest_server_name = @server_names.values.map(&:length).max
 
         @deployment.taps.reverse.each do |tap|
-          puts format_tap(tap)
+          STDOUT.puts format_tap(tap)
         end
       end
-
 
       ## Data formatters
 
@@ -160,6 +174,15 @@ module Deploy
         String.new.tap do |s|
           s << "#{server_name} ".color(text_colour, :bold)
           s << tap.message.color(text_colour).gsub(/\<[^\>]*\>/, '')
+          if tap.backend_message && tap.tap_type == 'command'
+            tap.backend_message.each_line('<br />') do |backend_line|
+              s << "\n"
+              s << " " * server_name.length
+              s << "   "
+              s << backend_line.color(text_colour).gsub(/\<[^\>]*\>/, '')
+            end
+          end
+          s << "\n"
         end
       end
 
