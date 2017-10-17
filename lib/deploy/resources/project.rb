@@ -1,5 +1,5 @@
 module Deploy
-  class Project < Base
+  class Project < Resource
 
     ## Return all deployments for this project
     def deployments

@@ -1,36 +1,36 @@
 module Deploy
   class Request
-    
+
     attr_reader :path, :method
     attr_accessor :data
-    
+
     def initialize(path, method = :get)
       @path = path
       @method = method
     end
-    
+
     def success?
       @success || false
     end
-    
+
     def output
       @output || nil
     end
-    
+
     ## Make a request to the Deploy API using net/http. Data passed can be a hash or a string
     ## Hashes will be converted to JSON before being sent to the remote service.
     def make
-      uri = URI.parse([Deploy.site, @path].join('/'))
+      uri = URI.parse([Deploy.configuration.account, @path].join('/'))
       http_request = http_class.new(uri.request_uri)
-      http_request.basic_auth(Deploy.email, Deploy.api_key)
+      http_request.basic_auth(Deploy.configuration.username, Deploy.configuration.api_key)
       http_request["Accept"] = "application/json"
       http_request["Content-type"] = "application/json"
-      
+
       http = Net::HTTP.new(uri.host, uri.port)
       if uri.scheme == 'https'
         http.use_ssl = true
       end
-      
+
       data = self.data.to_json if self.data.is_a?(Hash) && self.data.respond_to?(:to_json)
       http_result = http.request(http_request, data)
       @output = http_result.body
@@ -50,10 +50,10 @@ module Deploy
       end
       self
     end
-    
+
     private
-    
-    def http_class  
+
+    def http_class
       case @method
       when :post    then Net::HTTP::Post
       when :put     then Net::HTTP::Put
@@ -62,6 +62,6 @@ module Deploy
         Net::HTTP::Get
       end
     end
-    
+
   end
 end

@@ -11,25 +11,41 @@ require 'time'
 ## This is a ruby API library for the DeployHQ deployment platform.
 
 require 'deploy/errors'
+require 'deploy/configuration'
 require 'deploy/request'
 require 'deploy/base'
 
-require 'deploy/project'
-require 'deploy/deployment'
-require 'deploy/deployment_tap'
-require 'deploy/deployment_status_poll'
-require 'deploy/server'
-require 'deploy/server_group'
-require 'deploy/version'
+require 'deploy/resources/project'
+require 'deploy/resources/deployment'
+require 'deploy/resources/deployment_step'
+require 'deploy/resources/deployment_step_log'
+require 'deploy/resources/server'
+require 'deploy/resources/server_group'
 
+require 'deploy/version'
 
 module Deploy
   class << self
-    ## Domain which you wish to access (e.g. atech.deployhq.com)
-    attr_accessor :site
-    ## E-Mail address you wish to authenticate with
-    attr_accessor :email
-    ## API key for the user you wish to authenticate with
-    attr_accessor :api_key
+    attr_writer :configuration_file
+
+    def configure
+      @configuration ||= Configuration.new
+      yield @configuration if block_given?
+      @configuration
+    end
+
+    def configuration
+      @configuration ||= begin
+        if File.exist?(configuration_file)
+          Configuration.from_file(configuration_file)
+        else
+          Configuration.new
+        end
+      end
+    end
+
+    def configuration_file
+      @configuration_file ||= File.join(Dir.pwd, 'Deployfile')
+    end
   end
 end

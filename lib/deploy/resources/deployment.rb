@@ -1,6 +1,5 @@
 module Deploy
-  class Deployment < Base
-
+  class Deployment < Resource
     class << self
       def collection_path(params = {})
         "projects/#{params[:project].permalink}/deployments"
@@ -22,15 +21,17 @@ module Deploy
       self.attributes['project']
     end
 
-    def taps(params={})
-      params = {:deployment => self, :project => self.project}.merge(params)
-      DeploymentTap.find(:all, params)
+    def steps
+      if attributes['steps'].is_a?(Array)
+        @steps ||= attributes['steps'].map do |step_params|
+          DeploymentStep.new.tap do |step|
+            step.attributes = step_params
+            step.attributes['deployment'] = self
+          end
+        end
+      else
+        []
+      end
     end
-
-    def status_poll(params = {})
-      params = {:deployment => self, :project => self.project}.merge(params)
-      DeploymentStatusPoll.poll(params)
-    end
-
   end
 end

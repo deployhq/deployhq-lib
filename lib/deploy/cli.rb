@@ -42,10 +42,13 @@ module Deploy
           end
         end.parse!
 
-        @configuration = Config.new(options[:config_file])
-        Deploy.site = @configuration.account
-        Deploy.email = @configuration.username
-        Deploy.api_key = @configuration.api_key
+        if File.exists?(options[:config_file])
+          Deploy.configuration_file = options[:config_file]
+        else
+          STDERR.puts "Couldn't find configuration file at #{options[:confg_file]}"
+          exit 1
+        end
+
         @project = Deploy::Project.find(@configuration.project)
 
         case args[0]
