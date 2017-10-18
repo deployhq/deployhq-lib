@@ -14,8 +14,7 @@ module Deploy
 
     class << self
       def invoke(args)
-        options = OpenStruct.new
-        options.config_file = './Deployfile'
+        @options = OpenStruct.new
 
         parser = OptionParser.new do |opts|
           opts.banner = "Usage: deployhq [options] command"
@@ -23,17 +22,18 @@ module Deploy
           opts.separator "Commands:"
           opts.separator "deploy\t\t Start a new deployment"
           opts.separator "servers\t\t List configured servers and server groups"
+          opts.separator "configure\t\t Create a new configuration file for this tool"
           opts.separator ""
           opts.separator "Common Options:"
 
-          options.config_file = './Deployfile'
+          @options.config_file = './Deployfile'
           opts.on("-c", "--config path", 'Configuration file path') do |config_file_path|
-            options.config_file = config_file_path
+            @options.config_file = config_file_path
           end
 
           opts.on("-p", "--project project",
             "Project to operate on (default is read from project: in config file)") do |project_permalink|
-            options.project = project_permalink
+            @options.project = project_permalink
           end
 
           opts.on_tail('-v', '--version', "Shows Version") do
@@ -49,31 +49,36 @@ module Deploy
 
         begin
           parser.parse!(args)
+          command = args.pop
         rescue OptionParser::InvalidOption
           STDERR.puts parser.to_s
           exit 1
         end
 
-        begin
-          Deploy.configuration_file = options.config_file
-        rescue Errno::ENOENT
-          STDERR.puts "Couldn't find configuration file at #{options.config_file.inspect}"
-          exit 1
+        unless command == 'configure'
+          begin
+            Deploy.configuration_file = @options.config_file
+          rescue Errno::ENOENT
+            STDERR.puts "Couldn't find configuration file at #{@options.config_file.inspect}"
+            exit 1
+          end
+
+          project_permalink = @options.project || Deploy.configuration.project
+          if project_permalink.nil?
+            STDERR.puts "Project must be specified in config file or as --project argument"
+            exit 1
+          end
+
+          @project = Deploy::Project.find(project_permalink)
         end
 
-        project_permalink = options.project || Deploy.configuration.project
-        if project_permalink.nil?
-          STDERR.puts "Project must be specified in config file or as --project argument"
-          exit 1
-        end
-
-        @project = Deploy::Project.find(project_permalink)
-
-        case args.pop
+        case command
         when 'deploy'
           deploy
         when 'servers'
           server_list
+        when 'configure'
+          configure
         else
           STDERR.puts parser.to_s
         end
@@ -120,47 +125,39 @@ module Deploy
         DeploymentProgressOutput.new(deployment).monitor
       end
 
-      def deployment
-        @deployment = @project.deployments.first
-        @server_names = @deployment.servers.each_with_object({}) do |obj, hsh|
-          hsh[obj.delete("id")] = obj["name"]
-        end
-        @longest_server_name = @server_names.values.map(&:length).max
+      def configure
+        configuration = {
+          account: ask_config_question("Account Domain (e.g. atech.deployhq.com)", /\A[a-z0-9\.\-]+.deployhq.com\z/),
+          username: ask_config_question("Username or e-mail address"),
+          api_key: ask_config_question("API key (You can find this in Settings -> Security)"),
+          project: ask_config_question("Default project to use (please use permalink from web URL)")
+        }
 
-        @deployment.taps.reverse.each do |tap|
-          STDOUT.puts format_tap(tap)
+        confirmation = true
+        if File.exists?(@options.config_file)
+          confirmation = agree("File already exists at #{@options.config_file}. Overwrite? ")
+        end
+
+        return unless confirmation
+
+        file_data = JSON.pretty_generate(configuration)
+        File.write(@options.config_file, file_data)
+        say("File written to #{@options.config_file}")
+      end
+
+      def ask_config_question(question_text, valid_format = /.+/)
+        question_text = "#{question_text}: "
+        ask(question_text) do |q|
+          q.whitespace = :remove
+          q.responses[:not_valid] = "That answer is not valid"
+          q.responses[:ask_on_error] = :question
+          q.validate = valid_format
         end
       end
+
+      private
 
       ## Data formatters
-
-      def format_tap(tap)
-        server_name = @server_names[tap.server_id]
-
-        if server_name
-          padding = (@longest_server_name - server_name.length) / 2.0
-          server_name = "[#{' ' * padding.ceil} #{server_name} #{' ' * padding.floor}]"
-        else
-          server_name = ' '
-        end
-
-        text_colour = TAP_COLOURS[tap.tap_type.to_sym] || :white
-
-        String.new.tap do |s|
-          s << "#{server_name} ".color(text_colour, :bold)
-          s << tap.message.color(text_colour).gsub(/\<[^\>]*\>/, '')
-          if tap.backend_message && tap.tap_type == 'command'
-            tap.backend_message.each_line('<br />') do |backend_line|
-              s << "\n"
-              s << " " * server_name.length
-              s << "   "
-              s << backend_line.color(text_colour).gsub(/\<[^\>]*\>/, '')
-            end
-          end
-          s << "\n"
-        end
-      end
-
       def format_server(server)
         server_params = {
           "Name" => server.name,
