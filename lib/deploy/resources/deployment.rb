@@ -21,10 +21,24 @@ module Deploy
       self.attributes['project']
     end
 
+    def servers
+      if attributes['servers'].is_a?(Array)
+        @servers ||= attributes['servers'].map do |server_params|
+          Server.new.tap do |server|
+            server.id = server_params['id']
+            server.attributes = server_params
+          end
+        end
+      else
+        []
+      end
+    end
+
     def steps
       if attributes['steps'].is_a?(Array)
         @steps ||= attributes['steps'].map do |step_params|
           DeploymentStep.new.tap do |step|
+            step.id = step_params['identifier']
             step.attributes = step_params
             step.attributes['deployment'] = self
           end

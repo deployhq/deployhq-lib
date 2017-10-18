@@ -1,64 +1,79 @@
 require 'optparse'
 require 'highline/import'
 require 'deploy'
+require 'deploy/cli/deployment_progress_output'
 
 HighLine.colorize_strings
 
 module Deploy
   class CLI
-
     ## Constants for formatting output
-    TAP_COLOURS = {:info => :yellow, :error => :red, :success => :green}
     PROTOCOL_NAME = {:ssh => "SSH/SFTP", :ftp => "FTP", :s3 => "Amazon S3", :rackspace => "Rackspace CloudFiles"}
 
-    class Config
-      AVAILABLE_CONFIG = [:account, :username, :api_key, :project]
-
-      def initialize(config_file=nil)
-        @config_file_path = config_file || File.join(Dir.pwd, 'Deployfile')
-        @config = JSON.parse(File.read(@config_file_path))
-      rescue Errno::ENOENT => e
-        puts "Couldn't find configuration file at #{@config_file_path}"
-        exit 1
-      end
-
-      def method_missing(meth, *args, &block)
-        if AVAILABLE_CONFIG.include?(meth.to_sym)
-          @config[meth.to_s]
-        else
-          super
-        end
-      end
-    end
-
     class << self
+      def invoke(args)
+        options = OpenStruct.new
+        options.config_file = './Deployfile'
 
-      def invoke(*args)
-        options = {}
-        OptionParser.new do |opts|
-          opts.banner = "Usage: deployhq [command]"
-          opts.on("-c", "--config", 'Configuration file path') do |v|
-            options[:config_file] = v
+        parser = OptionParser.new do |opts|
+          opts.banner = "Usage: deployhq [options] command"
+          opts.separator ""
+          opts.separator "Commands:"
+          opts.separator "deploy\t\t Start a new deployment"
+          opts.separator "servers\t\t List configured servers and server groups"
+          opts.separator ""
+          opts.separator "Common Options:"
+
+          options.config_file = './Deployfile'
+          opts.on("-c", "--config path", 'Configuration file path') do |config_file_path|
+            options.config_file = config_file_path
           end
-        end.parse!
 
-        if File.exists?(options[:config_file])
-          Deploy.configuration_file = options[:config_file]
-        else
-          STDERR.puts "Couldn't find configuration file at #{options[:confg_file]}"
+          opts.on("-p", "--project project",
+            "Project to operate on (default is read from project: in config file)") do |project_permalink|
+            options.project = project_permalink
+          end
+
+          opts.on_tail('-v', '--version', "Shows Version") do
+            puts Deploy::VERSION
+            exit
+          end
+
+          opts.on_tail("-h", "--help", "Displays Help") do
+            puts opts
+            exit
+          end
+        end
+
+        begin
+          parser.parse!(args)
+        rescue OptionParser::InvalidOption
+          STDERR.puts parser.to_s
           exit 1
         end
 
-        @project = Deploy::Project.find(@configuration.project)
+        begin
+          Deploy.configuration_file = options.config_file
+        rescue Errno::ENOENT
+          STDERR.puts "Couldn't find configuration file at #{options.config_file.inspect}"
+          exit 1
+        end
 
-        case args[0]
+        project_permalink = options.project || Deploy.configuration.project
+        if project_permalink.nil?
+          STDERR.puts "Project must be specified in config file or as --project argument"
+          exit 1
+        end
+
+        @project = Deploy::Project.find(project_permalink)
+
+        case args.pop
         when 'deploy'
           deploy
         when 'servers'
           server_list
         else
-          puts "Usage: deployhq [command]"
-          return
+          STDERR.puts parser.to_s
         end
       end
 
@@ -97,55 +112,10 @@ module Deploy
         end
 
         latest_revision = @project.latest_revision(parent.preferred_branch)
-        @deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
+        deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
 
-        @server_names = @deployment.servers.each_with_object({}) do |server, hsh|
-          hsh[server['id']] = server['name']
-        end
-        @longest_server_name = @server_names.values.map(&:length).max
-
-        last_tap = nil
-        last_tap_lines = 0
-        current_status = 'pending'
-        previous_status = ''
-        STDOUT.print "Waiting for deployment capacity..."
-        while ['running', 'pending'].include?(current_status)
-          sleep 1
-
-          poll = @deployment.status_poll(:since => last_tap, :status => current_status)
-
-          # Status only gets returned from the API if it has changed
-          current_status = poll.status if poll.status
-
-          if current_status == 'pending'
-            STDOUT.print "."
-          elsif current_status == 'running' && previous_status == 'pending'
-            STDOUT.puts "\n"
-          end
-
-          if current_status != 'pending'
-            poll.taps.each do |tap|
-              # Delete most recent tap and redraw it if it's been updated
-              if tap.id.to_i == last_tap
-                if tap.updated
-                  # Restore the cursor to the start of the last entry so we can overwrite
-                  STDOUT.print "\e[#{last_tap_lines}A\r"
-                else
-                  next
-                end
-              end
-
-              tap_output = format_tap(tap)
-              last_tap_lines = tap_output.count("\n")
-              last_tap = tap.id.to_i
-
-              STDOUT.print tap_output
-              STDOUT.flush
-            end
-          end
-
-          previous_status = current_status
-        end
+        STDOUT.print "Waiting for an available deployment slot..."
+        DeploymentProgressOutput.new(deployment).monitor
       end
 
       def deployment

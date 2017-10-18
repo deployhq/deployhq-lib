@@ -4,4 +4,4 @@ $LOAD_PATH.unshift(libdir)
 
 require 'deploy/cli'
 
-Deploy::CLI.invoke(*ARGV)
+Deploy::CLI.invoke(ARGV)

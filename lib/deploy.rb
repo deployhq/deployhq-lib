@@ -27,8 +27,6 @@ require 'deploy/version'
 
 module Deploy
   class << self
-    attr_writer :configuration_file
-
     def configure
       @configuration ||= Configuration.new
       yield @configuration if block_given?
@@ -36,17 +34,11 @@ module Deploy
     end
 
     def configuration
-      @configuration ||= begin
-        if File.exist?(configuration_file)
-          Configuration.from_file(configuration_file)
-        else
-          Configuration.new
-        end
-      end
+      @configuration ||= Configuration.new
     end
 
-    def configuration_file
-      @configuration_file ||= File.join(Dir.pwd, 'Deployfile')
+    def configuration_file=(file_location)
+      @configuration = Configuration.from_file(file_location)
     end
   end
 end
