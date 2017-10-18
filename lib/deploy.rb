@@ -13,7 +13,6 @@ require 'time'
 require 'deploy/errors'
 require 'deploy/configuration'
 require 'deploy/request'
-require 'deploy/websocket_client'
 require 'deploy/resource'
 
 require 'deploy/resources/project'

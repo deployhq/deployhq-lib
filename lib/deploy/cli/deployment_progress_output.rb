@@ -15,7 +15,8 @@ module Deploy
       end
 
       def monitor
-        websocket_client = Deploy::WebsocketClient.new
+        websocket_client = Deploy::CLI::WebsocketClient.new
+
         subscription = websocket_client.subscribe('deployment', @deployment.identifier)
         subscription.on('log-entry', &method(:handle_log_entry))
         subscription.on('status-change', &method(:handle_status_change))

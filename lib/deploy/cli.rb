@@ -1,6 +1,8 @@
 require 'optparse'
 require 'highline/import'
+
 require 'deploy'
+require 'deploy/cli/websocket_client'
 require 'deploy/cli/deployment_progress_output'
 
 HighLine.colorize_strings
