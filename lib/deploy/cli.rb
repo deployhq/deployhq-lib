@@ -127,7 +127,8 @@ module Deploy
 
       def configure
         configuration = {
-          account: ask_config_question("Account Domain (e.g. atech.deployhq.com)", /\A[a-z0-9\.\-]+.deployhq.com\z/),
+          account: ask_config_question("Account Domain (e.g. https://atech.deployhq.com)",
+            %r{\Ahttps?://[a-z0-9\.\-]+.deployhq.com\z}),
           username: ask_config_question("Username or e-mail address"),
           api_key: ask_config_question("API key (You can find this in Settings -> Security)"),
           project: ask_config_question("Default project to use (please use permalink from web URL)")
