@@ -40,7 +40,7 @@ module Deploy
       when Net::HTTPServiceUnavailable
         raise Deploy::Errors::ServiceUnavailable
       when Net::HTTPForbidden, Net::HTTPUnauthorized
-        raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.email}'"
+        raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
       when Net::HTTPNotFound
         raise Deploy::Errors::CommunicationError, "Not Found at #{uri.to_s}"
       when Net::HTTPClientError
