@@ -1,7 +1,5 @@
 # DeployHQ API library and CLI client
 
-# DeplyoHQ CLI is currently not displaying deployment progress. We hope to have this resolved soon.
-
 ## Installation
 
 You'll need Ruby installed on your system. We've tested on 2.2.3, but other
