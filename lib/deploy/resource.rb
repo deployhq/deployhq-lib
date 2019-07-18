@@ -157,7 +157,7 @@ module Deploy
     ## Attributes which can be passed for update & creation
     def attributes_to_post
       self.attributes.inject(Hash.new) do |r,(key,value)|
-        r[key] = value if value.is_a?(String) || value.is_a?(Integer) || value.is_a?(Fixnum)
+        r[key] = value if value.is_a?(String) || value.is_a?(Integer)
         r
       end
     end

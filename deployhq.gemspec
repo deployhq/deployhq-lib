@@ -15,10 +15,9 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.bindir = "bin"
   s.executables << "deployhq"
-  s.has_rdoc = false
 
   s.add_dependency('json', '~> 1.8')
-  s.add_dependency('highline', '~> 1.7')
+  s.add_dependency('highline', '~> 2.0')
   s.add_dependency('websocket-eventmachine-client', '~> 1.2')
 
   s.author = "Dan Wentworth"
