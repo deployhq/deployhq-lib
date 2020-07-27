@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.bindir = "bin"
   s.executables << "deployhq"
 
-  s.add_dependency('json', '~> 1.8')
+  s.add_dependency('json', '>= 1.8', '< 3.0')
   s.add_dependency('highline', '~> 2.0')
   s.add_dependency('websocket-eventmachine-client', '~> 1.2')
 
