@@ -23,7 +23,6 @@ module Deploy
     ## Make a request to the Deploy API using net/http. Data passed can be a hash or a string
     ## Hashes will be converted to JSON before being sent to the remote service.
     def make
-      # uri = URI.parse([Deploy.configuration.account, @path].join('/'))
       uri = URI.parse(Deploy.configuration.account)
       connection_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
 
