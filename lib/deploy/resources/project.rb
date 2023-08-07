@@ -18,14 +18,14 @@ module Deploy
       parsed['ref']
     end
 
-    ## Create a deployment in this project (and queue it to run)
+    # Create a deployment in this project (and queue it to run)
     def deploy(server, start_revision, end_revision)
       run_deployment(server, start_revision, end_revision) do |d|
         d.mode = 'queue'
       end
     end
 
-    ##
+    # Create a deployment preview
     def preview(server, start_revision, end_revision)
       run_deployment(server, start_revision, end_revision) do |d|
         d.mode = 'preview'

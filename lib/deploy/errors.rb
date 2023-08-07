@@ -13,8 +13,11 @@ module Deploy
     ## Access was denied to the remote service
     class AccessDenied < Error; end
 
-    ## A communication error occured while talking to the Deploy API
+    ## A communication error occurred while talking to the Deploy API
     class CommunicationError < Error; end
+
+    # A timeout error
+    class TimeoutError < Error; end
 
     # Raised from the websocket client when we receive an error event
     class WebsocketError < Error; end

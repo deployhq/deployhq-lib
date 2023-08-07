@@ -1,3 +1,5 @@
 examples
 *.gem
+.ruby-version
+.idea
 Deployfile
