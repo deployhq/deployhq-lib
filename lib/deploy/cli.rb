@@ -1,8 +1,6 @@
 require 'optparse'
 require 'highline/import'
 
-require "pry"
-
 require 'deploy'
 require 'deploy/cli/websocket_client'
 require 'deploy/cli/deployment_progress_output'
