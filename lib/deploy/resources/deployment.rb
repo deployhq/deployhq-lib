@@ -1,6 +1,10 @@
+# frozen_string_literal: true
+
 module Deploy
   class Deployment < Resource
+
     class << self
+
       def collection_path(params = {})
         "projects/#{params[:project].permalink}/deployments"
       end
@@ -8,17 +12,16 @@ module Deploy
       def member_path(id, params = {})
         "projects/#{params[:project].permalink}/deployments/#{id}"
       end
+
     end
 
     def default_params
-      {:project => self.project}
+      { project: project }
     end
 
     def project
-      if self.attributes['project'].is_a?(Hash)
-        self.attributes['project'] = Project.send(:create_object, self.attributes['project'])
-      end
-      self.attributes['project']
+      attributes['project'] = Project.send(:create_object, attributes['project']) if attributes['project'].is_a?(Hash)
+      attributes['project']
     end
 
     def servers
@@ -47,5 +50,6 @@ module Deploy
         []
       end
     end
+
   end
 end

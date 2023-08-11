@@ -1,14 +1,20 @@
+# frozen_string_literal: true
+
 require 'websocket-eventmachine-client'
 require 'logger'
 
 module Deploy
   class CLI
+
     # Manages a connection and associated subscriptions to DeployHQ's websocket
     class WebsocketClient
+
       attr_reader :subscriptions
 
       class Subscription
-        attr_reader :exchange, :routing_key
+
+        attr_reader :exchange
+        attr_reader :routing_key
 
         def initialize(exchange, routing_key)
           @exchange = exchange
@@ -36,6 +42,7 @@ module Deploy
         def subscribed!
           @subscribed = true
         end
+
       end
 
       def initialize
@@ -51,10 +58,10 @@ module Deploy
         catch(:finished) do
           EM.run do
             connection.onopen do
-              logger.info "connected"
+              logger.info 'connected'
             end
 
-            connection.onmessage do |msg, type|
+            connection.onmessage do |msg, _type|
               receive(msg)
             end
 
@@ -68,7 +75,7 @@ module Deploy
 
       private
 
-      def dispatch(event, payload, mq = nil)
+      def dispatch(event, payload, rmq = nil)
         case event
         when 'Welcome'
           authenticate
@@ -79,7 +86,7 @@ module Deploy
         when 'Error', 'InternalError'
           websocket_error(payload)
         else
-          subscription_event(event, payload, mq) if mq
+          subscription_event(event, payload, rmq) if rmq
         end
       end
 
@@ -96,17 +103,17 @@ module Deploy
       def successful_subscription(payload)
         key = subscription_key(payload['exchange'], payload['routing_key'])
         subscription = subscriptions[key]
-        subscription.subscribed! if subscription
+        subscription&.subscribed!
       end
 
       def websocket_error(payload)
         raise Deploy::Errors::WebsocketError, payload['error']
       end
 
-      def subscription_event(event, payload, mq)
-        key = subscription_key(mq["e"], mq["rk"])
+      def subscription_event(event, payload, rmq)
+        key = subscription_key(rmq['e'], rmq['rk'])
         subscription = subscriptions[key]
-        subscription.dispatch(event, payload) if subscription
+        subscription&.dispatch(event, payload)
       end
 
       def receive(msg)
@@ -131,7 +138,7 @@ module Deploy
       end
 
       def logger
-        @logger ||= Logger.new(STDOUT)
+        @logger ||= Logger.new($stdout)
         @logger.level = Logger::ERROR
         @logger
       end
@@ -139,6 +146,8 @@ module Deploy
       def subscription_key(exchange, routing_key)
         [exchange, routing_key].join('-')
       end
+
     end
+
   end
 end

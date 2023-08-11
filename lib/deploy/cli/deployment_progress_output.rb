@@ -1,9 +1,15 @@
+# frozen_string_literal: true
+
 module Deploy
   class CLI
+
     class DeploymentProgressOutput
+
       SERVER_TAG_COLOURS = %w[32 33 34 35 36].cycle
 
-      attr_reader :deployment, :step_index, :server_tags
+      attr_reader :deployment
+      attr_reader :step_index
+      attr_reader :server_tags
 
       def initialize(deployment)
         @deployment = deployment
@@ -26,12 +32,13 @@ module Deploy
 
       private
 
+      # rubocop:disable Metrics/AbcSize
       def handle_log_entry(payload)
         step = step_index[payload['step']]
         server_tag = server_tags[step.server]
 
         line = "\n"
-        line << server_tag if server_tag
+        line = line.dup << server_tag if server_tag
         line << payload['message']
 
         if payload['detail']
@@ -44,18 +51,21 @@ module Deploy
           end
         end
 
-        STDOUT.print line
+        $stdout.print line
       end
+      # rubocop:enable Metrics/AbcSize
 
       def handle_status_change(payload)
         if payload['status'] == 'completed'
-          STDOUT.print "\nDeployment has finished successfully!\n"
+          $stdout.print "\nDeployment has finished successfully!\n"
         elsif payload['status'] == 'failed'
-          STDOUT.print "\nDeployment has failed!\n"
+          $stdout.print "\nDeployment has failed!\n"
         end
 
         throw(:finished) if %w[completed failed].include?(payload['status'])
       end
+
     end
+
   end
 end

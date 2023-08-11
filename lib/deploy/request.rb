@@ -1,10 +1,16 @@
+# frozen_string_literal: true
+
 require 'faraday'
 require 'json'
 
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/MethodLength
 module Deploy
   class Request
 
-    attr_reader :path, :method
+    attr_reader :path
+    attr_reader :method
     attr_accessor :data
 
     def initialize(path, method = :get)
@@ -40,25 +46,29 @@ module Deploy
       end
 
       @output = response.body
-      @success = case response.status
-                 when 200..299
-                   true
-                 when 503
-                   raise Deploy::Errors::ServiceUnavailable
-                 when 401, 403
-                   raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
-                 when 404
-                   raise Deploy::Errors::CommunicationError, "Not Found at #{uri.to_s}"
-                 when 400..499
-                   false
-                 else
-                   raise Deploy::Errors::CommunicationError, response.body
-                 end
+
+      case response.status
+      when 200..299
+        @success = true
+      when 503
+        @success = raise Deploy::Errors::ServiceUnavailable
+      when 401, 403
+        @success = raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
+      when 404
+        @success = raise Deploy::Errors::CommunicationError, "Not Found at #{uri}"
+      when 400..499
+        @success = false
+      else
+        @success = raise Deploy::Errors::CommunicationError, response.body
+      end
 
       self
     rescue Faraday::TimeoutError
-      raise Deploy::Errors::TimeoutError, "Your request timed out, please try again in a few seconds"
+      raise Deploy::Errors::TimeoutError, 'Your request timed out, please try again in a few seconds'
     end
 
   end
 end
+# rubocop:enable Metrics/AbcSize
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/MethodLength
