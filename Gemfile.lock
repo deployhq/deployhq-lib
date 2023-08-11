@@ -28,7 +28,9 @@ GEM
     websocket-native (1.0.0)
 
 PLATFORMS
-  arm64-darwin-21
+  aarch64-linux-musl
+  arm64-darwin
+  x86_64-darwin
   x86_64-linux
 
 DEPENDENCIES
