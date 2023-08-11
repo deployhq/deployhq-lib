@@ -69,7 +69,12 @@ module Deploy
             exit 1
           end
 
-          @project = Deploy::Project.find(project_permalink)
+          begin
+            @project = Deploy::Project.find(project_permalink)
+          rescue Deploy::Errors::TimeoutError => e
+            STDERR.puts e
+            exit 1
+          end
         end
 
         case command
@@ -135,7 +140,7 @@ module Deploy
         }
 
         confirmation = true
-        if File.exists?(@options.config_file)
+        if File.exist?(@options.config_file)
           confirmation = agree("File already exists at #{@options.config_file}. Overwrite? ")
         end
 

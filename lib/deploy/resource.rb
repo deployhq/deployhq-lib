@@ -30,7 +30,10 @@ module Deploy
 
       ## Find all objects and return an array of objects with the attributes set.
       def find_all(params)
-        output = JSON.parse(Request.new(collection_path(params)).make.output)
+        request = Request.new(collection_path(params))
+        output = request.make.output
+        output = JSON.parse(output)
+
         if output.is_a?(Hash) && output['records'] && output['pagination']
           output = output['records']
         end
@@ -42,9 +45,12 @@ module Deploy
 
       ## Find a single object and return an object for it.
       def find_single(id, params = {})
-        o = JSON.parse(Request.new(member_path(id, params)).make.output)
-        if o.is_a?(Hash)
-          create_object(o, params)
+        request = Request.new(member_path(id, params))
+        output = request.make.output
+        output = JSON.parse(output)
+
+        if output.is_a?(Hash)
+          create_object(output, params)
         else
           raise Deploy::Errors::NotFound, "Record not found"
         end
