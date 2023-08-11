@@ -2,8 +2,7 @@
 
 ## Installation
 
-You'll need Ruby installed on your system. We've tested on 2.2.3, but other
-versions may work fine.
+You'll need Ruby installed on your system. We've tested on `2.7.8` and later.
 
 ```
 gem install deployhq
