@@ -37,9 +37,9 @@ module Deploy
         step = step_index[payload['step']]
         server_tag = server_tags[step.server]
 
-        line = "\n"
-        line = line.dup << server_tag if server_tag
-        line << payload['message']
+        lines = ["\n"]
+        lines << server_tag
+        lines << payload['message']
 
         if payload['detail']
           padding_width = 0
@@ -47,11 +47,11 @@ module Deploy
           padding = ' ' * padding_width
 
           payload['detail'].split("\n").each do |detail_line|
-            line << "\n#{padding}| #{detail_line}"
+            lines << "\n#{padding}| #{detail_line}"
           end
         end
 
-        $stdout.print line
+        $stdout.print lines.join
       end
       # rubocop:enable Metrics/AbcSize
 

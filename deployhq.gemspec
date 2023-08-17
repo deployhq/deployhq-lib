@@ -15,13 +15,12 @@ Gem::Specification.new do |s|
   s.bindir = 'bin'
   s.executables << 'deployhq'
 
-  s.add_dependency('faraday', '~> 2.7')
   s.add_dependency('highline', '~> 2.1')
   s.add_dependency('json', '~> 2.6')
   s.add_dependency('websocket-eventmachine-client', '~> 1.2')
 
-  s.authors = ['Adam Cooke']
-  s.email = ['adam@krystal.uk']
+  s.author = 'Dan Wentworth'
+  s.email = 'dan@atech.io'
   s.homepage = 'https://www.deployhq.com'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

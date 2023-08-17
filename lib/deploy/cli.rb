@@ -7,7 +7,6 @@ require 'deploy'
 require 'deploy/cli/websocket_client'
 require 'deploy/cli/deployment_progress_output'
 
-HighLine.colorize_strings
 OptionsStruct = Struct.new(:config_file, :project)
 
 # rubocop:disable Metrics/ClassLength
@@ -16,15 +15,6 @@ OptionsStruct = Struct.new(:config_file, :project)
 # rubocop:disable Metrics/MethodLength
 # rubocop:disable Metrics/PerceivedComplexity
 module Deploy
-  #### Configure
-  # Command: deployhq configure
-  #
-  #### List servers
-  # Command: deployhq servers
-  #
-  ### Deploy to a server
-  # Command: deployhq deploy <option>
-  #
   class CLI
 
     ## Constants for formatting output
@@ -88,12 +78,7 @@ module Deploy
             exit 1
           end
 
-          begin
-            @project = Deploy::Project.find(project_permalink)
-          rescue Deploy::Errors::TimeoutError => e
-            warn e
-            exit 1
-          end
+          @project = Deploy::Project.find(project_permalink)
         end
 
         case command
@@ -112,7 +97,7 @@ module Deploy
         @server_groups ||= @project.server_groups
         if @server_groups.count.positive?
           @server_groups.each do |group|
-            puts "Group: #{group.name}".bold
+            puts "Group: #{group.name}"
             puts group.servers.map { |server| format_server(server) }.join("\n\n")
           end
         end
@@ -121,7 +106,7 @@ module Deploy
         return unless @ungrouped_servers.count.positive?
 
         puts "\n" if @server_groups.count.positive?
-        puts 'Ungrouped Servers'.bold
+        puts 'Ungrouped Servers'
         puts @ungrouped_servers.map { |server| format_server(server) }.join("\n\n")
       end
 
@@ -204,9 +189,9 @@ module Deploy
       # rubocop:disable Lint/FormatParameterMismatch
       def format_kv_pair(hash)
         longest_key = hash.keys.map(&:length).max + 2
-        hash.each_with_index.map do |(k, v), i|
+        hash.each_with_index.map do |(k, v), _i|
           str = format("%#{longest_key}s : %s", k, v)
-          i.zero? ? str.color(:bold) : str
+          str
         end.join("\n")
       end
       # rubocop:enable Lint/FormatParameterMismatch
