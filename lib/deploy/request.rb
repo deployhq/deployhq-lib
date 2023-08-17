@@ -31,31 +31,29 @@ module Deploy
       uri = URI.parse([Deploy.configuration.account, @path].join('/'))
       http_request = http_class.new(uri.request_uri)
       http_request.basic_auth(Deploy.configuration.username, Deploy.configuration.api_key)
-      http_request["Accept"] = "application/json"
-      http_request["Content-Type"] = "application/json"
+      http_request['Accept'] = 'application/json'
+      http_request['Content-Type'] = 'application/json'
 
       http = Net::HTTP.new(uri.host, uri.port)
-      if uri.scheme == 'https'
-        http.use_ssl = true
-      end
+      http.use_ssl = true if uri.scheme == 'https'
 
       data = self.data.to_json if self.data.is_a?(Hash) && self.data.respond_to?(:to_json)
       http_result = http.request(http_request, data)
       @output = http_result.body
-      @success = case http_result
-                 when Net::HTTPSuccess
-                   true
-                 when Net::HTTPServiceUnavailable
-                   raise Deploy::Errors::ServiceUnavailable
-                 when Net::HTTPForbidden, Net::HTTPUnauthorized
-                   raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
-                 when Net::HTTPNotFound
-                   raise Deploy::Errors::CommunicationError, "Not Found at #{uri.to_s}"
-                 when Net::HTTPClientError
-                   false
-                 else
-                   raise Deploy::Errors::CommunicationError, http_result.body
-                 end
+      case http_result
+      when Net::HTTPSuccess
+        @success = true
+      when Net::HTTPServiceUnavailable
+        @success = raise Deploy::Errors::ServiceUnavailable
+      when Net::HTTPForbidden, Net::HTTPUnauthorized
+        @success = raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
+      when Net::HTTPNotFound
+        @success = raise Deploy::Errors::CommunicationError, "Not Found at #{uri}"
+      when Net::HTTPClientError
+        @success = false
+      else
+        @success = raise Deploy::Errors::CommunicationError, http_result.body
+      end
       self
     end
 
