@@ -1,6 +1,3 @@
-require 'faraday'
-require 'json'
-
 module Deploy
   class Request
 
@@ -23,41 +20,47 @@ module Deploy
     ## Make a request to the Deploy API using net/http. Data passed can be a hash or a string
     ## Hashes will be converted to JSON before being sent to the remote service.
     def make
-      uri = URI.parse(Deploy.configuration.account)
-      connection_url = "#{uri.scheme}://#{uri.host}:#{uri.port}"
+      uri = URI.parse([Deploy.configuration.account, @path].join('/'))
+      http_request = http_class.new(uri.request_uri)
+      http_request.basic_auth(Deploy.configuration.username, Deploy.configuration.api_key)
+      http_request["Accept"] = "application/json"
+      http_request["Content-Type"] = "application/json"
 
-      connection = Faraday.new(url: connection_url, request: { timeout: 3 }) do |client|
-        client.request :authorization, :basic, Deploy.configuration.username, Deploy.configuration.api_key
-        client.headers['Accept'] = 'application/json'
-        client.headers['Content-Type'] = 'application/json'
+      http = Net::HTTP.new(uri.host, uri.port)
+      if uri.scheme == 'https'
+        http.use_ssl = true
       end
 
       data = self.data.to_json if self.data.is_a?(Hash) && self.data.respond_to?(:to_json)
-
-      response = connection.send(@method) do |req|
-        req.url @path
-        req.body = data
-      end
-
-      @output = response.body
-      @success = case response.status
-                 when 200..299
+      http_result = http.request(http_request, data)
+      @output = http_result.body
+      @success = case http_result
+                 when Net::HTTPSuccess
                    true
-                 when 503
+                 when Net::HTTPServiceUnavailable
                    raise Deploy::Errors::ServiceUnavailable
-                 when 401, 403
+                 when Net::HTTPForbidden, Net::HTTPUnauthorized
                    raise Deploy::Errors::AccessDenied, "Access Denied for '#{Deploy.configuration.username}'"
-                 when 404
+                 when Net::HTTPNotFound
                    raise Deploy::Errors::CommunicationError, "Not Found at #{uri.to_s}"
-                 when 400..499
+                 when Net::HTTPClientError
                    false
                  else
-                   raise Deploy::Errors::CommunicationError, response.body
+                   raise Deploy::Errors::CommunicationError, http_result.body
                  end
-
       self
-    rescue Faraday::TimeoutError
-      raise Deploy::Errors::TimeoutError, "Your request timed out, please try again in a few seconds"
+    end
+
+    private
+
+    def http_class
+      case @method
+      when :post    then Net::HTTP::Post
+      when :put     then Net::HTTP::Put
+      when :delete  then Net::HTTP::Delete
+      else
+        Net::HTTP::Get
+      end
     end
 
   end
