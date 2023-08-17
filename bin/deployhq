@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
-libdir = File.expand_path('../../lib', __FILE__)
+# frozen_string_literal: true
+
+libdir = File.expand_path('../lib', __dir__)
 $LOAD_PATH.unshift(libdir)
 
 require 'deploy/cli'

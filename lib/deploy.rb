@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'bundler'
 
@@ -25,7 +27,9 @@ require 'deploy/resources/server_group'
 require 'deploy/version'
 
 module Deploy
+
   class << self
+
     def configure
       @configuration ||= Configuration.new
       yield @configuration if block_given?
@@ -39,5 +43,7 @@ module Deploy
     def configuration_file=(file_location)
       @configuration = Configuration.from_file(file_location)
     end
+
   end
+
 end

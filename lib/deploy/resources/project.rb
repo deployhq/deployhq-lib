@@ -1,19 +1,21 @@
+# frozen_string_literal: true
+
 module Deploy
   class Project < Resource
 
     ## Return all deployments for this project
     def deployments
-      Deployment.find(:all, :project => self)
+      Deployment.find(:all, project: self)
     end
 
     ## Return a deployment
     def deployment(identifier)
-      Deployment.find(identifier, :project => self)
+      Deployment.find(identifier, project: self)
     end
 
     def latest_revision(branch = '')
       branch ||= 'master'
-      req = Request.new(self.class.member_path(self.permalink) + "/repository/latest_revision?branch=#{branch}").make
+      req = Request.new(self.class.member_path(permalink) + "/repository/latest_revision?branch=#{branch}").make
       parsed = JSON.parse(req.output)
       parsed['ref']
     end
@@ -34,11 +36,11 @@ module Deploy
 
     ## Return all servers for this project
     def servers
-      Server.find(:all, :project => self)
+      Server.find(:all, project: self)
     end
 
     def server_groups
-      ServerGroup.find(:all, :project => self)
+      ServerGroup.find(:all, project: self)
     end
 
     private

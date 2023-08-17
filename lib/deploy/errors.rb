@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deploy
 
   ## Base level error which all other deploy errors will inherit from. It may also be
@@ -18,5 +20,7 @@ module Deploy
 
     # Raised from the websocket client when we receive an error event
     class WebsocketError < Error; end
+
   end
+
 end

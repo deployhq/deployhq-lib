@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deploy
   class Resource
 
@@ -9,12 +11,16 @@ module Deploy
     def method_missing(method, *params)
       set = method.to_s.include?('=')
       key = method.to_s.sub('=', '')
-      self.attributes = Hash.new unless self.attributes.is_a?(Hash)
+      self.attributes = ({}) unless attributes.is_a?(Hash)
       if set
-        self.attributes[key] = params.first
+        attributes[key] = params.first
       else
-        self.attributes[key]
+        attributes[key]
       end
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      method_name.to_s.start_with?('user_') || super
     end
 
     class << self
@@ -34,10 +40,9 @@ module Deploy
         output = request.make.output
         output = JSON.parse(output)
 
-        if output.is_a?(Hash) && output['records'] && output['pagination']
-          output = output['records']
-        end
+        output = output['records'] if output.is_a?(Hash) && output['records'] && output['pagination']
         return [] unless output.is_a?(Array)
+
         output.map do |o|
           create_object(o, params)
         end
@@ -49,11 +54,9 @@ module Deploy
         output = request.make.output
         output = JSON.parse(output)
 
-        if output.is_a?(Hash)
-          create_object(output, params)
-        else
-          raise Deploy::Errors::NotFound, "Record not found"
-        end
+        raise Deploy::Errors::NotFound, 'Record not found' unless output.is_a?(Hash)
+
+        create_object(output, params)
       end
 
       ## Post to the specified object on the collection path
@@ -64,18 +67,18 @@ module Deploy
       ## Return the collection path for this model. Very lazy pluralizion here
       ## at the moment, nothing in Deploy needs to be pluralized with anything
       ## other than just adding an 's'.
-      def collection_path(params = {})
-        class_name.downcase + 's'
+      def collection_path(_params = {})
+        "#{class_name.downcase}s"
       end
 
       ## Return the member path for the passed ID & attributes
-      def member_path(id, params = {})
+      def member_path(id, _params = {})
         [collection_path, id].join('/')
       end
 
       ## Return the deploy class name
       def class_name
-        self.name.to_s.split('::').last.downcase
+        name.to_s.split('::').last.downcase
       end
 
       private
@@ -83,20 +86,21 @@ module Deploy
       ## Create a new object with the specified attributes and getting and ID.
       ## Returns the newly created object
       def create_object(attributes, objects = [])
-        o = self.new
+        o = new
         o.attributes = attributes
         o.id         = attributes['id']
-        for key, object in objects.select{|k,v| v.kind_of?(Deploy::Resource)}
+        objects.select { |_k, v| v.is_a?(Deploy::Resource) }.each do |key, object|
           o.attributes[key.to_s] = object
         end
         o
       end
+
     end
 
     ## Run a post on the member path. Returns the ouput from the post, false if a conflict or raises
     ## a Deploy::Error. Optionally, pass a second 'data' parameter to send data to the post action.
     def post(action, data = nil)
-      path = self.class.member_path(self.id, default_params) + "/" + action.to_s
+      path = "#{self.class.member_path(id, default_params)}/#{action}"
       request = Request.new(path, :post)
       request.data = data
       request.make
@@ -105,20 +109,21 @@ module Deploy
     ## Delete this record from the remote service. Returns true or false depending on the success
     ## status of the destruction.
     def destroy
-      Request.new(self.class.member_path(self.id, default_params), :delete).make.success?
+      Request.new(self.class.member_path(id, default_params), :delete).make.success?
     end
 
     def new_record?
-      self.id.nil?
+      id.nil?
     end
 
     def save
       new_record? ? create : update
     end
 
+    # rubocop:disable Metrics/AbcSize
     def create
       request = Request.new(self.class.collection_path(default_params), :post)
-      request.data = {self.class.class_name.downcase.to_sym => attributes_to_post}
+      request.data = { self.class.class_name.downcase.to_sym => attributes_to_post }
       if request.make && request.success?
         new_record = JSON.parse(request.output)
         self.attributes = new_record
@@ -129,13 +134,14 @@ module Deploy
         false
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     ## Push the updated attributes to the remote. Returns true if the record was saved successfully
     ## other false if not. If not saved successfully, the errors hash will be updated with an array
     ## of all errors with the submission.
     def update
-      request = Request.new(self.class.member_path(self.id, default_params), :put)
-      request.data = {self.class.class_name.downcase.to_sym => attributes_to_post}
+      request = Request.new(self.class.member_path(id, default_params), :put)
+      request.data = { self.class.class_name.downcase.to_sym => attributes_to_post }
       if request.make && request.success?
         true
       else
@@ -148,23 +154,21 @@ module Deploy
 
     ## Populate the errors hash from the given raw JSON output
     def populate_errors(json)
-      self.errors = Hash.new
-      JSON.parse(json).inject(self.errors) do |r, e|
+      self.errors = ({})
+      JSON.parse(json).each_with_object(errors) do |e, r|
         r[e.first] = e.last
-        r
       end
     end
 
     ## An array of params which should always be sent with this instances requests
     def default_params
-      Hash.new
+      {}
     end
 
     ## Attributes which can be passed for update & creation
     def attributes_to_post
-      self.attributes.inject(Hash.new) do |r,(key,value)|
+      attributes.each_with_object({}) do |(key, value), r|
         r[key] = value if value.is_a?(String) || value.is_a?(Integer)
-        r
       end
     end
 
