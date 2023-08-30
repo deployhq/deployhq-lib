@@ -72,3 +72,6 @@ Style/FrozenStringLiteralComment:
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
+
+Gemspec/RequireMFA:
+  Enabled: false
