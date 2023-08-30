@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/krystal/deployhq-lib/compare/v2.1.1...v2.1.2) (2023-08-30)
+
+
+### Bug Fixes
+
+* change gem author, email, homepage and MFA settings ([58e4643](https://github.com/krystal/deployhq-lib/commit/58e464344feb9ee5609037c04f3ee1bd7d932afc))
+
 ## [2.1.1](https://github.com/krystal/deployhq-lib/compare/v1.1.0...v2.1.1) (2023-08-17)
 
 
