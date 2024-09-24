@@ -21,18 +21,15 @@ module Deploy
     end
 
     # Create a deployment in this project (and queue it to run)
-    def deploy(server, start_revision, end_revision)
+    def deploy(server, start_revision, end_revision, config_files_only: false)
       run_deployment(server, start_revision, end_revision) do |d|
         d.mode = 'queue'
+        d.config_files_deployment = '1' if config_files_only
       end
     end
 
     def config_files_deployment(server)
-      run_deployment(server, nil, nil) do |d|
-        d.mode = 'queue'
-        d.copy_config_files = '1'
-        d.config_files_deployment = '1'
-      end
+      deploy(server, nil, nil, config_files_only: true)
     end
 
     # Create a deployment preview
