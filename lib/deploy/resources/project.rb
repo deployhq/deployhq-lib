@@ -27,6 +27,14 @@ module Deploy
       end
     end
 
+    def config_files_deployment(server)
+      run_deployment(server, nil, nil) do |d|
+        d.mode = 'queue'
+        d.copy_config_files = '1'
+        d.config_files_deployment = '1'
+      end
+    end
+
     # Create a deployment preview
     def preview(server, start_revision, end_revision)
       run_deployment(server, start_revision, end_revision) do |d|
