@@ -25,7 +25,7 @@ module Deploy
       def invoke(args)
         @options = OptionsStruct.new
 
-        parser = OptionParser.new do |opts|
+        parser = OptionParser.new do |opts| # rubocop:disable Metrics/BlockLength
           opts.banner = 'Usage: deployhq [options] command'
           opts.separator ''
           opts.separator 'Commands:'
