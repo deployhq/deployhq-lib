@@ -133,8 +133,10 @@ module Deploy
         end
 
         if @options.config_files_deployment
+          $stdout.print "\nStarting config files deployment\n"
           deployment = @project.config_files_deployment(parent.identifier)
         else
+          $stdout.print "\nStarting deployment\n"
           latest_revision = @project.latest_revision(parent.preferred_branch)
           deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
         end
