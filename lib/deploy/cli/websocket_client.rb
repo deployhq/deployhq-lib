@@ -95,7 +95,7 @@ module Deploy
       end
 
       def request_subscriptions
-        subscriptions.each do |_key, subscription|
+        subscriptions.each_value do |subscription|
           send('Subscribe', exchange: subscription.exchange, routing_key: subscription.routing_key)
         end
       end

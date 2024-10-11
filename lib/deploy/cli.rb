@@ -7,7 +7,7 @@ require 'deploy'
 require 'deploy/cli/websocket_client'
 require 'deploy/cli/deployment_progress_output'
 
-OptionsStruct = Struct.new(:config_file, :project)
+OptionsStruct = Struct.new(:config_file, :project, :config_files_deployment)
 
 # rubocop:disable Metrics/ClassLength
 # rubocop:disable Metrics/AbcSize
@@ -25,7 +25,7 @@ module Deploy
       def invoke(args)
         @options = OptionsStruct.new
 
-        parser = OptionParser.new do |opts|
+        parser = OptionParser.new do |opts| # rubocop:disable Metrics/BlockLength
           opts.banner = 'Usage: deployhq [options] command'
           opts.separator ''
           opts.separator 'Commands:'
@@ -43,6 +43,11 @@ module Deploy
           opts.on('-p', '--project project',
                   'Project to operate on (default is read from project: in config file)') do |project_permalink|
             @options.project = project_permalink
+          end
+
+          @options.config_files_deployment = false
+          opts.on('--config-files', 'Config files deployment') do |_config_files_deployment|
+            @options.config_files_deployment = true
           end
 
           opts.on_tail('-v', '--version', 'Shows Version') do
@@ -127,8 +132,14 @@ module Deploy
           end
         end
 
-        latest_revision = @project.latest_revision(parent.preferred_branch)
-        deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
+        if @options.config_files_deployment
+          $stdout.print "\nStarting config files deployment\n"
+          deployment = @project.config_files_deployment(parent.identifier)
+        else
+          $stdout.print "\nStarting deployment\n"
+          latest_revision = @project.latest_revision(parent.preferred_branch)
+          deployment = @project.deploy(parent.identifier, parent.last_revision, latest_revision)
+        end
 
         $stdout.print 'Waiting for an available deployment slot...'
         DeploymentProgressOutput.new(deployment).monitor
