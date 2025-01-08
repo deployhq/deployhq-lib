@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/deployhq/deployhq-lib/compare/v2.1.2...v2.2.0) (2025-01-08)
+
+
+### Features
+
+* Allow config files deployment. ([1db6ce1](https://github.com/deployhq/deployhq-lib/commit/1db6ce14fcf8944ae5733baeb65ec5d789aa3445))
+
+
+### Documentation
+
+* Improve README with Release instructions. ([57a9f11](https://github.com/deployhq/deployhq-lib/commit/57a9f11d106a4f4ac9a5b158cc3b15e6f90b7b0c))
+
 ## [2.1.2](https://github.com/krystal/deployhq-lib/compare/v2.1.1...v2.1.2) (2023-08-30)
 
 
