@@ -2,17 +2,20 @@ name: CI
 on: [push]
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ['2.7', '3.0', '3.1', '3.2', '3.3', '3.4']
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.1
+          ruby-version: ${{ matrix.ruby-version }}
       - name: Install dependencies
         run: bundle install
-      - name: Run linter
-        run: bundle exec rubocop
+      - name: Run linter and tests
+        run: bundle exec rake
 
   release-please:
     runs-on: ubuntu-latest
@@ -26,7 +29,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: [lint, release-please]
+    needs: [test, release-please]
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - uses: actions/checkout@v4

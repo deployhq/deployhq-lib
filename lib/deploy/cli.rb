@@ -100,7 +100,7 @@ module Deploy
 
       def server_list
         @server_groups ||= @project.server_groups
-        if @server_groups.count.positive?
+        if @server_groups.any?
           @server_groups.each do |group|
             puts "Group: #{group.name}"
             puts group.servers.map { |server| format_server(server) }.join("\n\n")
@@ -108,9 +108,9 @@ module Deploy
         end
 
         @ungrouped_servers ||= @project.servers
-        return unless @ungrouped_servers.count.positive?
+        return unless @ungrouped_servers.any?
 
-        puts "\n" if @server_groups.count.positive?
+        puts "\n" if @server_groups.any?
         puts 'Ungrouped Servers'
         puts @ungrouped_servers.map { |server| format_server(server) }.join("\n\n")
       end
@@ -197,7 +197,6 @@ module Deploy
         end.join("\n")
       end
 
-      # rubocop:disable Lint/FormatParameterMismatch
       def format_kv_pair(hash)
         longest_key = hash.keys.map(&:length).max + 2
         hash.each_with_index.map do |(k, v), _i|
@@ -205,7 +204,6 @@ module Deploy
           str
         end.join("\n")
       end
-      # rubocop:enable Lint/FormatParameterMismatch
 
     end
 

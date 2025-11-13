@@ -1,14 +1,26 @@
 AllCops:
   TargetRubyVersion: 2.7
   NewCops: enable
+  SuggestExtensions: false
 
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+    - test/**/*
 
 Metrics/ModuleLength:
   Exclude:
     - spec/**/*
+    - test/**/*
+
+Metrics/MethodLength:
+  Max: 14
+  Exclude:
+    - test/**/*
+
+Metrics/AbcSize:
+  Exclude:
+    - test/**/*
 
 Style/StringConcatenation:
   Enabled: false
@@ -20,8 +32,9 @@ Naming/FileName:
   Exclude:
     - lib/klogger-logger.rb
 
-Metrics/MethodLength:
-  Max: 14
+Naming/PredicateMethod:
+  Exclude:
+    - lib/deploy/resource.rb
 
 Metrics/ClassLength:
   Max: 120
