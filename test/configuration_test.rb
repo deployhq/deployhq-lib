@@ -40,6 +40,7 @@ class ConfigurationTest < Minitest::Test
 
     Tempfile.create(['config', '.json']) do |f|
       f.write(JSON.generate(config_data))
+      f.flush
       f.rewind
 
       config = Deploy::Configuration.from_file(f.path)
@@ -62,6 +63,7 @@ class ConfigurationTest < Minitest::Test
 
     Tempfile.create(['config', '.json']) do |f|
       f.write(JSON.generate(config_data))
+      f.flush
       f.rewind
 
       config = Deploy::Configuration.from_file(f.path)
@@ -80,6 +82,7 @@ class ConfigurationTest < Minitest::Test
   def test_from_file_raises_on_invalid_json
     Tempfile.create(['config', '.json']) do |f|
       f.write('invalid json {')
+      f.flush
       f.rewind
 
       assert_raises(JSON::ParserError) do
