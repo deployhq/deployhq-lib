@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency('json', '~> 2.6')
   s.add_dependency('websocket-eventmachine-client', '~> 1.2')
 
-  s.authors = ['Adam Cooke']
-  s.email = ['adam@k.io']
-  s.homepage = 'https://github.com/krystal/deployhq-lib'
+  s.authors = ['DeployHQ Team']
+  s.email = ['support@deployhq.com']
+  s.homepage = 'https://github.com/deployhq/deployhq-lib'
 end
