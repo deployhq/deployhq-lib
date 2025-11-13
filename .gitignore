@@ -4,3 +4,4 @@ examples
 .idea
 Deployfile
 Gemfile.lock
+spec/examples.txt

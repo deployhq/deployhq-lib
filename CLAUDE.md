@@ -22,10 +22,13 @@ bundle exec rake
 bundle exec rubocop
 
 # Run only tests
-bundle exec rake test
+bundle exec rspec
 
 # Run a specific test file
-bundle exec ruby -Ilib:test test/configuration_test.rb
+bundle exec rspec spec/configuration_spec.rb
+
+# Run tests with verbose output
+bundle exec rspec --format documentation
 ```
 
 ### Building the gem
