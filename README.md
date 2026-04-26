@@ -1,5 +1,11 @@
 # DeployHQ API library and CLI client
 
+> **DEPRECATED:** The CLI in this gem is deprecated and will be removed in a future release.
+> Please use the new [DeployHQ CLI](https://github.com/deployhq/deployhq-cli) instead,
+> which offers more features, fewer dependencies, and first-class support for AI-assisted workflows.
+>
+> The Ruby API library (`Deploy::Resource`, etc.) remains available for programmatic use.
+
 ## Installation
 
 You'll need Ruby installed on your system. We've tested on `2.7.8` and later.

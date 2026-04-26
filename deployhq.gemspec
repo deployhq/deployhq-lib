@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.required_ruby_version = '>= 2.7'
   s.licenses = ['MIT']
-  s.summary = 'API and CLI client for the DeployHQ'
-  s.description = 'API and CLI client for the DeployHQ deployment platform. Provides the deployhq executable.'
+  s.summary = 'API and CLI client for the DeployHQ (CLI deprecated)'
+  s.description = 'API and CLI client for the DeployHQ deployment platform. NOTE: The CLI is deprecated. Please use https://github.com/deployhq/deployhq-cli instead.'
   s.files = Dir.glob('{lib,bin}/**/*')
   s.require_paths = ['lib']
   s.bindir = 'bin'
@@ -22,4 +22,8 @@ Gem::Specification.new do |s|
   s.authors = ['DeployHQ Team']
   s.email = ['support@deployhq.com']
   s.homepage = 'https://github.com/deployhq/deployhq-lib'
+  s.post_install_message = <<~MSG
+    WARNING: The DeployHQ CLI bundled in this gem is deprecated.
+    Please migrate to the new CLI: https://github.com/deployhq/deployhq-cli
+  MSG
 end
