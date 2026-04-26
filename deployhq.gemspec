@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.licenses = ['MIT']
   s.summary = 'API and CLI client for the DeployHQ (CLI deprecated)'
   s.description = 'API and CLI client for the DeployHQ deployment platform. ' \
-                    'NOTE: The CLI is deprecated. ' \
-                    'Please use https://github.com/deployhq/deployhq-cli instead.'
+                  'NOTE: The CLI is deprecated. ' \
+                  'Please use https://github.com/deployhq/deployhq-cli instead.'
   s.files = Dir.glob('{lib,bin}/**/*')
   s.require_paths = ['lib']
   s.bindir = 'bin'
