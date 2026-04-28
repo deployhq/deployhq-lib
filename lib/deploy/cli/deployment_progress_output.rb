@@ -14,9 +14,9 @@ module Deploy
       def initialize(deployment)
         @deployment = deployment
 
-        @step_index = @deployment.steps.each_with_object({}) { |s, hsh| hsh[s.identifier] = s }
-        @server_tags = @deployment.servers.each_with_object({}) do |s, hsh|
-          hsh[s.id] = "\e[#{SERVER_TAG_COLOURS.next};1m[#{s.name}]\e[0m "
+        @step_index = @deployment.steps.to_h { |s| [s.identifier, s] }
+        @server_tags = @deployment.servers.to_h do |s|
+          [s.id, "\e[#{SERVER_TAG_COLOURS.next};1m[#{s.name}]\e[0m "]
         end
       end
 

@@ -22,7 +22,19 @@ module Deploy
 
     class << self
 
+      DEPRECATION_NOTICE = <<~MSG
+        \e[33m╔══════════════════════════════════════════════════════════════════╗
+        ║  DEPRECATED: This CLI is deprecated and will be removed in a    ║
+        ║  future release. Please migrate to the new DeployHQ CLI:       ║
+        ║                                                                ║
+        ║    https://github.com/deployhq/deployhq-cli                    ║
+        ║                                                                ║
+        ║  More features, fewer dependencies, and built for the AI era.  ║
+        ╚══════════════════════════════════════════════════════════════════╝\e[0m
+      MSG
+
       def invoke(args)
+        warn DEPRECATION_NOTICE
         @options = OptionsStruct.new
 
         parser = OptionParser.new do |opts| # rubocop:disable Metrics/BlockLength
